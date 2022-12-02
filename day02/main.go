@@ -23,7 +23,6 @@ func first() int {
 	}
 	defer f.Close()
 	fileScanner := bufio.NewScanner(f)
-	fileScanner.Split(bufio.ScanLines)
 
 	var total int
 	for fileScanner.Scan() {
@@ -42,88 +41,50 @@ func second() int {
 	}
 	defer f.Close()
 	fileScanner := bufio.NewScanner(f)
-	fileScanner.Split(bufio.ScanLines)
 
 	var total int
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
 		game := strings.Split(line, " ")
-		s := secondScore(game[0], game[1])
-		total += s
+		total += secondScore(game[0], game[1])
 	}
 	return total
 }
 
 func secondScore(op, res string) int {
-	total := winScore(res)
-	switch op + res { // X perte
-	case "AX":
-		total += pscore("Z")
-	case "AY":
-		total += pscore("X")
-	case "AZ":
-		total += pscore("Y")
-	case "BX":
-		total += pscore("X")
-	case "BY":
-		total += pscore("Y")
-	case "BZ":
-		total += pscore("Z")
-	case "CX":
-		total += pscore("Y")
-	case "CY":
-		total += pscore("Z")
-	case "CZ":
-		total += pscore("X")
+	intRes := map[string]int{"X": 0, "Y": 3, "Z": 6}
+	valRes := intRes[res]
+	fScore := map[string]int{
+		"AX": valRes + resScore("Z"),
+		"AY": valRes + resScore("X"),
+		"AZ": valRes + resScore("Y"),
+		"BX": valRes + resScore("X"),
+		"BY": valRes + resScore("Y"),
+		"BZ": valRes + resScore("Z"),
+		"CX": valRes + resScore("Y"),
+		"CY": valRes + resScore("Z"),
+		"CZ": valRes + resScore("X"),
 	}
-	return total
+	return fScore[op+res]
 }
 
 func score(op, my string) int {
-	total := pscore(my)
-	switch op + my {
-	case "AX":
-		total += 3
-	case "AY":
-		total += 6
-	case "AZ":
-		total += 0
-	case "BX":
-		total += 0
-	case "BY":
-		total += 3
-	case "BZ":
-		total += 6
-	case "CX":
-		total += 6
-	case "CY":
-		total += 0
-	case "CZ":
-		total += 3
+	rs := resScore(my)
+	fScore := map[string]int{
+		"AX": rs + 3,
+		"AY": rs + 6,
+		"AZ": rs + 0,
+		"BX": rs + 0,
+		"BY": rs + 3,
+		"BZ": rs + 6,
+		"CX": rs + 6,
+		"CY": rs + 0,
+		"CZ": rs + 3,
 	}
-	return total
+	return fScore[op+my]
 }
 
-func pscore(my string) int {
-	switch my {
-	case "X":
-		return 1
-	case "Y":
-		return 2
-	case "Z":
-		return 3
-	}
-	return 0
-}
-
-func winScore(result string) int {
-	switch result {
-	case "X":
-		return 0
-	case "Y":
-		return 3
-	case "Z":
-		return 6
-	}
-	return 0
+func resScore(my string) int {
+	s := map[string]int{"X": 1, "Y": 2, "Z": 3}
+	return s[my]
 }

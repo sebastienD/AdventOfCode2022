@@ -22,7 +22,7 @@ func main() {
 	}
 	defer f.Close()
 	fileScanner := bufio.NewScanner(f)
-	fileScanner.Split(bufio.ScanLines)
+
 	elves := []elf{}
 	current := elf{}
 	max := 0
