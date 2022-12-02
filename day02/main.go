@@ -8,14 +8,16 @@ import (
 	"strings"
 )
 
+var resScore = map[string]int{"X": 1, "Y": 2, "Z": 3}
+
 func main() {
-	score := first()
+	score := computeFile(scoring)
 	fmt.Printf("Le score total est %d\n", score)
-	score = second()
+	score = computeFile(secondScoring)
 	fmt.Printf("Le score total est %d\n", score)
 }
 
-func first() int {
+func computeFile(apply func(op, my string) int) int {
 	filename := "input.txt"
 	f, err := os.Open(filename)
 	if err != nil {
@@ -28,48 +30,30 @@ func first() int {
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
 		game := strings.Split(line, " ")
-		total += score(game[0], game[1])
+		total += apply(game[0], game[1])
 	}
 	return total
 }
 
-func second() int {
-	filename := "input.txt"
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatalf("Read file %s: %v", filename, err)
-	}
-	defer f.Close()
-	fileScanner := bufio.NewScanner(f)
-
-	var total int
-	for fileScanner.Scan() {
-		line := fileScanner.Text()
-		game := strings.Split(line, " ")
-		total += secondScore(game[0], game[1])
-	}
-	return total
-}
-
-func secondScore(op, res string) int {
+func secondScoring(op, res string) int {
 	intRes := map[string]int{"X": 0, "Y": 3, "Z": 6}
 	valRes := intRes[res]
 	fScore := map[string]int{
-		"AX": valRes + resScore("Z"),
-		"AY": valRes + resScore("X"),
-		"AZ": valRes + resScore("Y"),
-		"BX": valRes + resScore("X"),
-		"BY": valRes + resScore("Y"),
-		"BZ": valRes + resScore("Z"),
-		"CX": valRes + resScore("Y"),
-		"CY": valRes + resScore("Z"),
-		"CZ": valRes + resScore("X"),
+		"AX": valRes + resScore["Z"],
+		"AY": valRes + resScore["X"],
+		"AZ": valRes + resScore["Y"],
+		"BX": valRes + resScore["X"],
+		"BY": valRes + resScore["Y"],
+		"BZ": valRes + resScore["Z"],
+		"CX": valRes + resScore["Y"],
+		"CY": valRes + resScore["Z"],
+		"CZ": valRes + resScore["X"],
 	}
 	return fScore[op+res]
 }
 
-func score(op, my string) int {
-	rs := resScore(my)
+func scoring(op, my string) int {
+	rs := resScore[my]
 	fScore := map[string]int{
 		"AX": rs + 3,
 		"AY": rs + 6,
@@ -82,9 +66,4 @@ func score(op, my string) int {
 		"CZ": rs + 3,
 	}
 	return fScore[op+my]
-}
-
-func resScore(my string) int {
-	s := map[string]int{"X": 1, "Y": 2, "Z": 3}
-	return s[my]
 }
