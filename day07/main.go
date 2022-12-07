@@ -9,11 +9,14 @@ import (
 )
 
 func main() {
-	sum := computeFile()
+	fs := computeFile()
+	sum := first(fs)
 	fmt.Printf("La somme vaut %d\n", sum)
+	smallest := second(fs)
+	fmt.Printf("Le plus petit directory à supprimer vaut %d\n", smallest)
 }
 
-func computeFile() int64 {
+func computeFile() map[string]resource {
 	filename := "input.txt"
 	f, _ := os.Open(filename)
 	defer f.Close()
@@ -61,22 +64,15 @@ func computeFile() int64 {
 	arbo[current.path] = current
 	//fmt.Println("arbo", arbo)
 
-	max := int64(100000)
-	_ = calc(arbo, arbo["/"], max)
-	var total int64
-	for _, v := range arbo {
-		if v.total <= max {
-			total += v.total
-		}
-	}
-	return total
+	_ = calc(arbo, arbo["/"])
+	return arbo
 }
 
-func calc(arbo map[string]resource, res resource, max int64) int64 {
+func calc(arbo map[string]resource, res resource) int64 {
 	if res.total == -1 {
 		res.total = 0
 		for _, dir := range res.dirs {
-			c := calc(arbo, arbo[dir], max)
+			c := calc(arbo, arbo[dir])
 			res.total += c
 		}
 		for _, v := range res.files {
@@ -97,4 +93,31 @@ type resource struct {
 
 func newRes(p string) resource {
 	return resource{path: p, total: -1}
+}
+
+func first(arbo map[string]resource) int64 {
+	max := int64(100000)
+	var total int64
+	for _, v := range arbo {
+		if v.total <= max {
+			total += v.total
+		}
+	}
+	return total
+}
+
+func second(arbo map[string]resource) int64 {
+	totalDisk := int64(70000000)
+	mustFree := int64(30000000)
+	used := arbo["/"].total
+	unused := totalDisk - used
+
+	toFind := mustFree - unused
+	smallest := totalDisk
+	for _, v := range arbo {
+		if v.total >= toFind && v.total < smallest {
+			smallest = v.total
+		}
+	}
+	return smallest
 }
